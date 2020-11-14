@@ -39,7 +39,10 @@ def product_category(request, category_path):
             for product in product_list:
                 filters_dict[k]['choices'].append(product.attributes_json[k]) if product.attributes_json[k] not in filters_dict[k]['default'] else filters_dict[k]['default']
             filters_dict[k]['choices'].append(any_mapping_word)
-            filters_dict[k]['default'] = request.GET.get(k + '_bool')
+            if request.GET.get(k + '_bool') != any_mapping_word:
+                filters_dict[k]['default'] = bool(request.GET.get(k + '_bool'))
+            else:
+                filters_dict[k]['default'] = request.GET.get(k + '_bool')
 
     if request.GET.get('filter_active'):
         filter_active = True

@@ -20,6 +20,7 @@
     <br><br><label for="{{ k }}_bool">{{ k }}</label><br>
     <select name="{{ k }}_bool" de>
 {% for option in v.choices %}
+        {{ option }} {{ v.default }}
         <option value="{{ option }}" {% if option == v.default %}selected="selected"{% endif %}>{{ option }}</option>
 {% endfor %}
     </select>
