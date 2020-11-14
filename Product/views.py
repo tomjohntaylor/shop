@@ -14,6 +14,7 @@ def product_category(request, category_path):
     filter_submited_dict = {}
     product_list = Product.objects.filter(product_category=product_category)
     any_mapping_word = 'dowolny'
+    filter_active = False
 
     for k, v in product_category.attributes_json.items():
         filters_dict[k] = {}
@@ -28,20 +29,20 @@ def product_category(request, category_path):
         if type(v) in (str,):
             filters_dict[k]['default'] = []
             for product in product_list:
-                filters_dict[k]['choices'].append(product.attributes_json[k])
+                filters_dict[k]['choices'].append(product.attributes_json[k]) if (product.attributes_json[k]) not in filters_dict[k]['choices'] else filters_dict[k]['choices']
             filters_dict[k]['choices'].append(any_mapping_word)
             filters_dict[k]['default'] = []
             for choice in filters_dict[k]['choices']:
                 if request.GET.get(k + '_' + choice) or request.GET.get(k + '_' + any_mapping_word):
-                    filters_dict[k]['default'].append(choice)
+                    filters_dict[k]['default'].append(choice) if choice not in filters_dict[k]['default'] else filters_dict[k]['default']
         if type(v) in (bool,):
             for product in product_list:
-                filters_dict[k]['choices'].append(product.attributes_json[k])
+                filters_dict[k]['choices'].append(product.attributes_json[k]) if product.attributes_json[k] not in filters_dict[k]['default'] else filters_dict[k]['default']
             filters_dict[k]['choices'].append(any_mapping_word)
             filters_dict[k]['default'] = request.GET.get(k + '_bool')
 
-
     if request.GET.get('filter_active'):
+        filter_active = True
         filter_submited_dict = {}
         for k, v in filters_dict.items():
             print(v['type'])
@@ -86,7 +87,8 @@ def product_category(request, category_path):
     return render(request, 'product_category.html', {'product_category': product_category,
                                                      'product_list': product_list,
                                                      'filter_submited_dict': filter_submited_dict,
-                                                     'filters_dict': filters_dict})
+                                                     'filters_dict': filters_dict,
+                                                     'filter_active': filter_active})
 
 
 def product_details(request, category_path, id):

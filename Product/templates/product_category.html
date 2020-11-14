@@ -17,7 +17,7 @@
     <br><input type="checkbox" name="{{ k }}_{{ option }}" {% if option in v.default %}checked{% endif %}> {{ option }}
 {% endfor %}
 {% elif 'bool' in v.type %}
-    <label for="{{ k }}_bool">{{ k }}</label><br>
+    <br><br><label for="{{ k }}_bool">{{ k }}</label><br>
     <select name="{{ k }}_bool" de>
 {% for option in v.choices %}
         <option value="{{ option }}" {% if option == v.default %}selected="selected"{% endif %}>{{ option }}</option>
@@ -25,6 +25,6 @@
     </select>
 {% endif %}
 {% endfor %}
-    <br><br><input type="checkbox" name="filter_active"> Potwierdzenie filtrowania
+    <br><br><input type="checkbox" name="filter_active" {% if filter_active %}checked{% endif %}> Potwierdzenie filtrowania
     <br><input type="submit" value="Uruchom filtrowanie"/>
 </form>
