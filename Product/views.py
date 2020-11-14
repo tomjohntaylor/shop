@@ -14,15 +14,7 @@ def product_category(request, category_path):
     filter_submited_dict = {}
     product_list = Product.objects.filter(product_category=product_category)
 
-    for k,v in product_category.attributes_json.items():
-        filter_submited_dict[k] = {}
-        if request.GET.get(k+'_min'):
-            filter_submited_dict[k]['_min'] = request.GET.get(k+'_min')
-        if request.GET.get(k+'_max'):
-            filter_submited_dict[k]['_max'] = request.GET.get(k+'_max')
-        if request.GET.get(k+'_choice'):
-            filter_submited_dict[k]['_choice'] = request.GET.get(k+'_choice')
-
+    for k, v in product_category.attributes_json.items():
         filters_dict[k] = {}
         filters_dict[k]['value'] = v
         filters_dict[k]['type'] = str(type(v))
@@ -30,25 +22,42 @@ def product_category(request, category_path):
         if type(v) in (str, bool):
             for product in product_list:
                 filters_dict[k]['choices'].append(product.attributes_json[k])
-
-    product_list_filtered = []
-    for product in product_list:
-        pass_filtering = True
-        print(product)
-        for k,v in filter_submited_dict.items():
-            if '_min' in v.keys():
-                if product.attributes_json[k] < int(v['_min']):
-                    pass_filtering = False
-            if '_max' in v.keys():
-                if product.attributes_json[k] > int(v['_max']):
-                    pass_filtering = False
-            if '_choice' in v.keys():
-                if str(product.attributes_json[k]) != v['_choice']:
-                    pass_filtering = False
-        if pass_filtering:
-            product_list_filtered.append(product)
+            filters_dict[k]['choices'].append('dowolny')
 
     if request.GET.get('filter_active'):
+        filter_submited_dict = {}
+        for k, v in filters_dict.items():
+            print(v['type'])
+            if 'int' in v['type']:
+                filter_submited_dict[k] = {}
+                if request.GET.get(k + '_min'):
+                    filter_submited_dict[k]['_min'] = request.GET.get(k + '_min')
+                if request.GET.get(k + '_max'):
+                    filter_submited_dict[k]['_max'] = request.GET.get(k + '_max')
+            if 'str' in v['type'] or 'bool' in v['type']:
+                filter_submited_dict[k] = []
+                for choice in v['choices']:
+                    if request.GET.get(k + '_' + choice):
+                        filter_submited_dict[k].append(choice)
+
+        product_list_filtered = []
+        for product in product_list:
+            pass_filtering = True
+            for k, v in filter_submited_dict.items():
+                if 'int' in filters_dict[k]['type']:
+                    if '_min' in v.keys():
+                        if product.attributes_json[k] < int(v['_min']):
+                            pass_filtering = False
+                    if '_max' in v.keys():
+                        if product.attributes_json[k] > int(v['_max']):
+                            pass_filtering = False
+                if 'str' in filters_dict[k]['type'] or 'bool' in filters_dict[k]['type']:
+                    if str(product.attributes_json[k]) not in v and 'dowolny' not in v:
+                        pass_filtering = False
+
+            if pass_filtering:
+                product_list_filtered.append(product)
+
         product_list = product_list_filtered
 
     return render(request, 'product_category.html', {'product_category': product_category,

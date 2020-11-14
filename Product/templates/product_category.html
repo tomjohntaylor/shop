@@ -2,24 +2,21 @@
 {% for product in product_list %}
 <br><a href="{% url 'product_details' product.product_category.category_path product.id %}">{{ product.product_name }}</a>
 {% endfor %}
-<br><br>
 
 <form action='{{ request.path }}'> {% csrf_token %}
 {% for k,v in filters_dict.items %}
 {% if 'int' in v.type %}
-    <label for="{{ k }}_min">{{ k }} MIN</label><br>
-    <input type="text" id="{{ k }}_min" name="{{ k }}_min"><br>
-    <label for="{{ k }}_max">{{ k }} MAX</label><br>
-    <input type="text" id="{{ k }}_max" name="{{ k }}_max"><br>
+    <br><br><label for="{{ k }}_min">{{ k }} MIN</label>
+    <br><input type="text" id="{{ k }}_min" name="{{ k }}_min">
+    <br><label for="{{ k }}_max">{{ k }} MAX</label>
+    <br><input type="text" id="{{ k }}_max" name="{{ k }}_max">
 {% elif 'str' in v.type or 'bool' in v.type %}
-    <label for="{{ k }}_choices">{{ k }}</label><br>
-    <select name="{{ k }}_choice">
+    <br><br><label for="{{ k }}_choices">{{ k }}</label>
 {% for option in v.choices %}
-        <option value="{{ option }}">{{ option }}</option>
+    <br><input type="checkbox" name="{{ k }}_{{ option }}"> {{ option }}
 {% endfor %}
-    </select>
 {% endif %}
 {% endfor %}
-    <br><input type="checkbox" name="filter_active"> Filter active?
-    <br><input type="submit" value="Filter!"/>
+    <br><br><input type="checkbox" name="filter_active"> Potwierdzenie filtrowania
+    <br><input type="submit" value="Uruchom filtrowanie"/>
 </form>
