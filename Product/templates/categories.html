@@ -1,0 +1,4 @@
+{% for product_category in product_category_list %}
+{{ product_category.product_path }}
+<a href="{{ product_category.category_path }}">{{ product_category.category_path }}</a>
+{% endfor %}
