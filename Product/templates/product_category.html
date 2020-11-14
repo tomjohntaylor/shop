@@ -1,10 +1,12 @@
+{% extends 'base.html' %}
 
+{% block content %}
 
 {% for product in product_list %}
 <br><a href="{% url 'product_details' product.product_category.category_path product.id %}">{{ product.product_name }}</a>
 {% endfor %}
 
-<form id="filter_form" action='{{ request.path }}'> {% csrf_token %}
+<form id="filter_form"> {% csrf_token %}
 {% for k,v in filters_dict.items %}
 {% if 'int' in v.type %}
     <br><br><label for="{{ k }}_min">{{ k }} MIN</label>
@@ -20,7 +22,6 @@
     <br><br><label for="{{ k }}_bool">{{ k }}</label><br>
     <select name="{{ k }}_bool" de>
 {% for option in v.choices %}
-        {{ option }} {{ v.default }}
         <option value="{{ option }}" {% if option == v.default %}selected="selected"{% endif %}>{{ option }}</option>
 {% endfor %}
     </select>
@@ -29,3 +30,5 @@
     <br><br><input type="checkbox" name="filter_active" {% if filter_active %}checked{% endif %}> Potwierdzenie filtrowania
     <br><input type="submit" value="Uruchom filtrowanie"/>
 </form>
+
+{% endblock %}

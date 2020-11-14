@@ -17,9 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 
+from User import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', lambda request: redirect('products/', permanent=False)),
-    path('products/', include('Product.urls'))
+    path('products/', include('Product.urls'), name='products'),
+
+    path('signup/', views.signupuser, name='signupuser'),
+    path('logout/', views.logoutuser, name='logoutuser'),
+    path('login/', views.loginuser, name='loginuser')
 ]

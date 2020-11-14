@@ -1,5 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
 {{ product.product_name }}
 
 {% for k,v in product.attributes_json.items %}
 <br>{{ k }} {{ v }}
 {% endfor %}
+
+{% endblock %}
