@@ -1,20 +1,28 @@
 
+
 {% for product in product_list %}
 <br><a href="{% url 'product_details' product.product_category.category_path product.id %}">{{ product.product_name }}</a>
 {% endfor %}
 
-<form action='{{ request.path }}'> {% csrf_token %}
+<form id="filter_form" action='{{ request.path }}'> {% csrf_token %}
 {% for k,v in filters_dict.items %}
 {% if 'int' in v.type %}
     <br><br><label for="{{ k }}_min">{{ k }} MIN</label>
-    <br><input type="text" id="{{ k }}_min" name="{{ k }}_min">
+    <br><input type="number" id="{{ k }}_min" name="{{ k }}_min" value="{{ v.default.min }}">
     <br><label for="{{ k }}_max">{{ k }} MAX</label>
-    <br><input type="text" id="{{ k }}_max" name="{{ k }}_max">
-{% elif 'str' in v.type or 'bool' in v.type %}
+    <br><input type="number" id="{{ k }}_max" name="{{ k }}_max" value="{{ v.default.max }}">
+{% elif 'str' in v.type %}
     <br><br><label for="{{ k }}_choices">{{ k }}</label>
 {% for option in v.choices %}
-    <br><input type="checkbox" name="{{ k }}_{{ option }}"> {{ option }}
+    <br><input type="checkbox" name="{{ k }}_{{ option }}" {% if option in v.default %}checked{% endif %}> {{ option }}
 {% endfor %}
+{% elif 'bool' in v.type %}
+    <label for="{{ k }}_bool">{{ k }}</label><br>
+    <select name="{{ k }}_bool" de>
+{% for option in v.choices %}
+        <option value="{{ option }}" {% if option == v.default %}selected="selected"{% endif %}>{{ option }}</option>
+{% endfor %}
+    </select>
 {% endif %}
 {% endfor %}
     <br><br><input type="checkbox" name="filter_active"> Potwierdzenie filtrowania
