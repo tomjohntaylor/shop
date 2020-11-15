@@ -5,7 +5,7 @@ from .models import ProductCategory, Product
 
 def categories(request):
     product_category_list = ProductCategory.objects.filter(is_root=False)
-    return render(request, 'categories.html', {'product_category_list': product_category_list})
+    return render(request, 'product/categories.html', {'product_category_list': product_category_list})
 
 
 def product_category(request, category_path):
@@ -106,7 +106,7 @@ def product_category(request, category_path):
 
         product_list = product_list_filtered
 
-    return render(request, 'product_category.html', {'product_category': product_category,
+    return render(request, 'product/product_category.html', {'product_category': product_category,
                                                      'product_list': product_list,
                                                      'filter_submited_dict': filter_submited_dict,
                                                      'filters_dict': filters_dict,
@@ -116,6 +116,6 @@ def product_category(request, category_path):
 def product_details(request, category_path, id):
     product = get_object_or_404(Product, id=id)
     product_category = ProductCategory.objects.get(category_path=category_path)
-    return render(request, 'product_details.html', {'product': product,
+    return render(request, 'product/product_details.html', {'product': product,
                                                     'product_category': product_category})
 
