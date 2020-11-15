@@ -22,7 +22,7 @@ def product_category(request, category_path):
         filters_dict[k]['type'] = str(type(v))
         filters_dict[k]['choices'] = []
         filters_dict[k]['default'] = {}
-        if type(v) in (int,):
+        if type(v) in (int,float,):
             filters_dict[k]['default'] = {}
             filters_dict[k]['default']['min'] = request.GET.get(k + '_min', '')
             filters_dict[k]['default']['max'] = request.GET.get(k + '_max', '')
@@ -30,6 +30,19 @@ def product_category(request, category_path):
             filters_dict[k]['default'] = []
             for product in product_list:
                 filters_dict[k]['choices'].append(product.attributes_json[k]) if (product.attributes_json[k]) not in filters_dict[k]['choices'] else filters_dict[k]['choices']
+            filters_dict[k]['choices'].append(any_mapping_word)
+            filters_dict[k]['default'] = []
+            for choice in filters_dict[k]['choices']:
+                if request.GET.get(k + '_' + choice) or request.GET.get(k + '_' + any_mapping_word):
+                    filters_dict[k]['default'].append(choice) if choice not in filters_dict[k]['default'] else filters_dict[k]['default']
+        if type(v) in (list,):
+            filters_dict[k]['default'] = []
+            for product in product_list:
+                if type(product.attributes_json[k]) == str:
+                    filters_dict[k]['choices'].append(product.attributes_json[k]) if (product.attributes_json[k]) not in filters_dict[k]['choices'] else filters_dict[k]['choices']
+                else:
+                    for ch in product.attributes_json[k]:
+                        filters_dict[k]['choices'].append(ch) if ch not in filters_dict[k]['choices'] else filters_dict[k]['choices']
             filters_dict[k]['choices'].append(any_mapping_word)
             filters_dict[k]['default'] = []
             for choice in filters_dict[k]['choices']:
@@ -48,14 +61,13 @@ def product_category(request, category_path):
         filter_active = True
         filter_submited_dict = {}
         for k, v in filters_dict.items():
-            print(v['type'])
-            if 'int' in v['type']:
+            if 'int' in v['type'] or 'float' in v['type']:
                 filter_submited_dict[k] = {}
                 if request.GET.get(k + '_min'):
                     filter_submited_dict[k]['_min'] = request.GET.get(k + '_min')
                 if request.GET.get(k + '_max'):
                     filter_submited_dict[k]['_max'] = request.GET.get(k + '_max')
-            if 'str' in v['type']:
+            if 'str' in v['type'] or 'list' in v['type']:
                 filter_submited_dict[k] = []
                 for choice in v['choices']:
                     if request.GET.get(k + '_' + choice):
@@ -68,16 +80,23 @@ def product_category(request, category_path):
         for product in product_list:
             pass_filtering = True
             for k, v in filter_submited_dict.items():
-                if 'int' in filters_dict[k]['type']:
+                if 'int' in filters_dict[k]['type'] or 'float' in filters_dict[k]['type']:
                     if '_min' in v.keys():
-                        if product.attributes_json[k] <= int(v['_min']):
+                        if product.attributes_json[k] < float(v['_min']):
                             pass_filtering = False
                     if '_max' in v.keys():
-                        if product.attributes_json[k] >= int(v['_max']):
+                        if product.attributes_json[k] > float(v['_max']):
                             pass_filtering = False
                 if 'str' in filters_dict[k]['type'] or 'bool' in filters_dict[k]['type']:
                     if str(product.attributes_json[k]) not in v and any_mapping_word not in v:
                         pass_filtering = False
+                if 'list' in filters_dict[k]['type']:
+                    if type(product.attributes_json[k]) == str:
+                        if not set([product.attributes_json[k],]).issubset(list(v)) and any_mapping_word not in v:
+                            pass_filtering = False
+                    else:
+                        if not set(list(product.attributes_json[k])).issubset(list(v)) and any_mapping_word not in v:
+                            pass_filtering = False
                 if 'bool' in filters_dict[k]['type']:
                     if str(product.attributes_json[k]) != v and v != any_mapping_word:
                         pass_filtering = False
