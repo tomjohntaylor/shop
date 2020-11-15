@@ -21,5 +21,6 @@ from . import views
 urlpatterns = [
     path('', views.categories, name='categories'),
     path('<str:category_path>/', views.product_category, name='product_category'),
-    path('<str:category_path>/<int:id>/', views.product_details, name='product_details')
+    path('<str:category_path>/<int:id>/', views.product_details, name='product_details'),
+    path('add_to_cart', views.add_to_cart, name='add_to_cart')
 ]

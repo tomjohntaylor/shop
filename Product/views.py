@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 
 from .models import ProductCategory, Product
+from SaleProcess.models import Cart, create_user_cart
 
 
 def categories(request):
@@ -117,5 +120,19 @@ def product_details(request, category_path, id):
     product = get_object_or_404(Product, id=id)
     product_category = ProductCategory.objects.get(category_path=category_path)
     return render(request, 'product/product_details.html', {'product': product,
-                                                    'product_category': product_category})
+                                                            'product_category': product_category})
+
+
+
+def add_to_cart(request):
+    if request.user.is_authenticated:
+        cart = create_user_cart(request.user)
+        cart.add_product(request.GET['product_id'], request.GET['qty'])
+        cart.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        request.session['cart_json'] = {}
+        request.session['cart_json'][request.GET['product_id']] = request.GET['qty']
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 

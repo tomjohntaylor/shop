@@ -7,9 +7,17 @@ Logged in as {{ user.username }}
 </form>
 
 {% else %}
-<a href="#">Sign up</a>
-<a href="#">Login</a>
+<a href="{% url 'signupuser' %}">Sign up</a>
+<a href="{% url 'loginuser' %}">Login</a>
 
+{% endif %}
+<br>
+{% if cart_data %}
+{% for k,v in cart_data.items %}
+<br>{{ v.product.product_name }}: {{ v.qty }}
+{% endfor %}
+{% else %}
+Nie dodales jeszcze nic do koszyka!
 {% endif %}
 
 <br><br>
