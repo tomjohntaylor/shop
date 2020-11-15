@@ -30,11 +30,17 @@ class ProductCategory(models.Model):
         else:
             self.category_path = self.category_name
 
+    def validate_attributes_types(self):
+        for k, v in self.attributes_json.items():
+            if type(v) not in (int, float, list, str):
+                raise ValidationError('Dopuszczalne typy parametrów to (int, float, list, str)')
+
 
 @receiver(pre_save, sender=ProductCategory)
 def update_category_pre(sender, instance, **kwargs):
     if instance.root_category and instance.root_category == instance:
         raise ValidationError('You cant make root category itself!')
+    instance.validate_attributes_types()
 
     instance.update_category_path()
 
@@ -88,7 +94,10 @@ class Product(models.Model):
         new_attr = {}
         for k, v in category_attr.items():
             if k in product_attr.keys():
-                new_attr[k] = product_attr[k]
+                if type(product_attr[k]) == type(category_attr[k]):
+                    new_attr[k] = product_attr[k]
+                else:
+                    new_attr[k] = category_attr[k]
             else:
                 new_attr[k] = category_attr[k]
         self.attributes_json = new_attr
@@ -99,12 +108,14 @@ class Product(models.Model):
         category_attr = self.product_category.attributes_json
         if set(product_attr.keys()) != set(category_attr.keys()):
             raise ValidationError('Keys are not the same!') # dopisac listowanie brakujacych lub nadmiarowych kluczy
-        category_attr_key_types = {}
-        for k,v in category_attr.items():
-            category_attr_key_types[k] = type(v)
         for k,v in product_attr.items():
-            if type(v) != category_attr_key_types[k]:
+            if type(v) != type(category_attr[k]) and not (type(v) == str and type(category_attr[k]) == list):
                 raise ValidationError('One of key type is invalid!') # dopisac listowanie blednych kluczy
+        for k,v in product_attr.items():
+            if type(v) == list and not set(list(v)).issubset(list(category_attr[k])) or type(v) == str and not set([v,]).issubset(list(category_attr[k])):
+                print(set(list(v)), list(category_attr[k]))
+                raise ValidationError('Element listy nie znajduje sie w dopuszczalnych!') # dopisac listowanie blednych kluczy
+
 
 @receiver(pre_save, sender=Product)
 def update_product_pre(sender, instance, **kwargs):
