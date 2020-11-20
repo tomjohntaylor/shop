@@ -14,7 +14,7 @@ class ProductCategory(models.Model):
     )
     category_path = models.CharField(max_length=300, editable=False, default=None, unique=True)
 
-    attributes_json = models.JSONField(default={"dane": "brak"})
+    attributes_json = models.JSONField(default={"dane": 0})
     attributes_old_json = models.JSONField(default=dict, editable=False)
 
     any_mapping_keyword = 'dowolny'
@@ -37,7 +37,7 @@ class ProductCategory(models.Model):
             if type(v) not in (int, float, list): # mozna dorzucic bool ewentualnie
                 raise ValidationError('Dopuszczalne typy parametrów to (int, float, list)')
 
-    def create_filter_dict(self, request, product_list):
+    def create_filter_dict(self, request, product_list): # tu mozna rozwazyc zeby filter_dict byl atrybutem klasy aktualizowanym zawsze po jej utworzeniu/zmianie
         filter_dict = {}
         for k, v in self.attributes_json.items():
             filter_dict[k] = {}
@@ -101,15 +101,13 @@ def update_category_pre(sender, instance, **kwargs):
     if instance.root_category and instance.root_category == instance:
         raise ValidationError('You cant make root category itself!')
     instance.validate_attributes_types()
-
     instance.update_category_path()
-
     if not instance.attributes_old_json:
         instance.attributes_old_json = instance.attributes_json
-
+    if instance.attributes_json == {"dane": 0} and instance.root_category:
+        instance.attributes_json = instance.root_category.attributes_json
     if instance.root_category:
         instance.root_category.make_root()
-
         for product in Product.objects.all():
             if product.product_category == instance.root_category:
                 product.move_to_not_assigned()
@@ -121,12 +119,6 @@ def update_category_post(sender, instance, **kwargs):
             product.update_attrbutes()
         instance.attributes_old_json = instance.attributes_json
         instance.save()
-    if instance.attributes_json == {"dane": "brak"} and instance.root_category:
-        print("instance.attributes_json = instance.root_category.attributes_json")
-        instance.attributes_json = instance.root_category.attributes_json
-        instance.save()
-
-
 
 
 class Product(models.Model):
@@ -136,7 +128,7 @@ class Product(models.Model):
         on_delete=models.CASCADE,
         limit_choices_to={'is_root': False}
     )
-    attributes_json = models.JSONField(default={"dane": "brak"})
+    attributes_json = models.JSONField(default={"dane": 0})
 
     def __str__(self):
         return self.product_name
@@ -145,7 +137,7 @@ class Product(models.Model):
         if not ProductCategory.objects.filter(category_path='_Nieprzypisane'):
             ProductCategory.objects.create(category_name='_Nieprzypisane')
         self.product_category = ProductCategory.objects.get(category_path='_Nieprzypisane')
-        self.attributes_json = {"dane": "brak"}
+        self.attributes_json = {"dane": 0}
         self.save()
 
     def update_attrbutes(self):
@@ -179,7 +171,7 @@ class Product(models.Model):
 
 @receiver(pre_save, sender=Product)
 def update_product_pre(sender, instance, **kwargs):
-    if instance.attributes_json == {"dane": "brak"}:
+    if instance.attributes_json == {"dane": 0}:
         instance.attributes_json = instance.product_category.attributes_json
     else:
         instance.validate_attributes_json()
