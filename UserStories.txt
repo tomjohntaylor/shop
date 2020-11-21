@@ -5,7 +5,7 @@ Funkcjonalności główne:
 2. Administrator dodaje domyslne atrybuty kategorii dwóch typów: liczba lub lista wyboru (walidacja atrybutow podczas tworzenia)
 3. Administrator tworzy podkategorie wskazując kategorie źródłową (walidacja aby nie mozna bylo utworzyc podkategorii wskazujac siebie na zrodlowa)
 4. Jezeli podkategoria nie bedzie miala wskazanych atrybutów ({"dane": 0}) automatycznie zostaną pobrane atrybuty kategorii źrółdowej
-TODO 5. Jezeli administrator zmieni atrybuty kategorii źródłowej atrybuty podkategorii automatycznie zostaną zaktualizowane (dot. dodawania/usuwania atrybutow, zmiamy typu atrybutu lub zmiany wartosci domyslnej)
+5. Jezeli administrator zmieni atrybuty kategorii źródłowej atrybuty podkategorii automatycznie zostaną zaktualizowane (dot. dodawania/usuwania atrybutow, zmiamy typu atrybutu lub zmiany wartosci domyslnej)
 6. Usuniecie kategorii zrodlowej spowoduje usuniecie wszystkich jej podkategorii
 7. Kazda kategoria posiada atrybut okreslajacy jej sciezke dziedziczenia (category_path), ktora wskazuje jakie sa jej kategorie zrodlowe
 8. Atrybut typu lista definiuje mozliwe wartosci parametru dla produktu, możliwość wielokrotnego wyboru
