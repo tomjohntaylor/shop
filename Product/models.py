@@ -32,6 +32,19 @@ class ProductCategory(models.Model):
         else:
             self.category_path = self.category_name
 
+    def update_category_attrbutes(self):
+        new_attr = {}
+        for k, v in self.root_category.attributes_json.items():
+            if k in self.attributes_json.keys():
+                if isinstance(product_attr[k], type(category_attr[k])):
+                    new_attr[k] = self.attributes_json[k]
+                else:
+                    new_attr[k] = self.root_category.attributes_json[k]
+            else:
+                new_attr[k] = self.root_category.attributes_json[k]
+        self.attributes_json = new_attr
+        self.save()
+
     def validate_attributes_types(self):
         for k, v in self.attributes_json.items():
             if type(v) not in (int, float, list): # mozna dorzucic bool ewentualnie
@@ -116,9 +129,13 @@ def update_category_pre(sender, instance, **kwargs):
 def update_category_post(sender, instance, **kwargs):
     if instance.attributes_json != instance.attributes_old_json:
         for product in Product.objects.filter(product_category=instance):
-            product.update_attrbutes()
+            product.update_product_attrbutes()
         instance.attributes_old_json = instance.attributes_json
         instance.save()
+
+        if instance.is_root:
+            for category in ProductCategory.objects.filter(root_category=instance):
+                category.update_category_attrbutes()
 
 
 class Product(models.Model):
@@ -140,18 +157,16 @@ class Product(models.Model):
         self.attributes_json = {"dane": 0}
         self.save()
 
-    def update_attrbutes(self):
-        product_attr = self.attributes_json
-        category_attr = self.product_category.attributes_json
+    def update_product_attrbutes(self):
         new_attr = {}
-        for k, v in category_attr.items():
-            if k in product_attr.keys():
-                if isinstance(product_attr[k], type(category_attr[k])):
-                    new_attr[k] = product_attr[k]
+        for k, v in self.product_category.attributes_json.items():
+            if k in self.attributes_json.keys():
+                if isinstance(self.attributes_json[k], type(self.product_category.attributes_json[k])):
+                    new_attr[k] = self.attributes_json[k]
                 else:
-                    new_attr[k] = category_attr[k]
+                    new_attr[k] = self.product_category.attributes_json[k]
             else:
-                new_attr[k] = category_attr[k]
+                new_attr[k] = self.product_category.attributes_json[k]
         self.attributes_json = new_attr
         self.save()
 

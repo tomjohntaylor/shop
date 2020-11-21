@@ -1,0 +1,10 @@
+...
+
+do uzupełnienia
+
+...
+
+2020-11-21
+1. Dodanie UserStories.txt
+2. Usuwanie produktu z koszyka gdy zostanie usuniety z bazy danych
+3. Dziedziczenie zmian z kategorii zrodlowej do podkategorii
