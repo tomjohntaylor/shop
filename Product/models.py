@@ -146,7 +146,7 @@ class Product(models.Model):
         new_attr = {}
         for k, v in category_attr.items():
             if k in product_attr.keys():
-                if type(product_attr[k]) == type(category_attr[k]):
+                if isinstance(product_attr[k], type(category_attr[k])):
                     new_attr[k] = product_attr[k]
                 else:
                     new_attr[k] = category_attr[k]
@@ -172,6 +172,6 @@ class Product(models.Model):
 @receiver(pre_save, sender=Product)
 def update_product_pre(sender, instance, **kwargs):
     if instance.attributes_json == {"dane": 0}:
-        instance.attributes_json = instance.product_category.attributes_json
+        instance.attributes_json = instance.product_category.attributes_json # TODO zamienic to na metode klasy
     else:
         instance.validate_attributes_json()
