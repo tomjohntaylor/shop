@@ -15,16 +15,14 @@ def product_category(request, category_path):
     product_list = Product.objects.filter(product_category=product_category)
     filter_active = False
     filter_dict = product_category.create_filter_dict(request, product_list)
-    filter_submited_dict = {}
 
     if request.GET.get('filter_active'):
         filter_active = True
-        filter_submited_dict = product_category.create_filter_submited_dict(request, filter_dict)
-        product_list = product_category.filter_products(filter_dict, product_list, filter_submited_dict)
+        # filter_submited_dict = product_category.create_filter_submited_dict(request, filter_dict)
+        product_list = product_category.filter_products(request, filter_dict, product_list)
 
     return render(request, 'product/product_category.html', {'product_category': product_category,
                                                      'product_list': product_list,
-                                                     'filter_submited_dict': filter_submited_dict,
                                                      'filter_dict': filter_dict,
                                                      'filter_active': filter_active})
 

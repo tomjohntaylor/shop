@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
 
@@ -24,6 +24,10 @@ class ProductCategory(models.Model):
 
     def make_root(self):
         self.is_root = True
+        self.save()
+
+    def un_root(self):
+        self.is_root = False
         self.save()
 
     def update_category_path(self):
@@ -68,45 +72,32 @@ class ProductCategory(models.Model):
                     filter_dict[k]['choices'].append(self.any_mapping_keyword)
                 filter_dict[k]['default'] = []
                 for choice in filter_dict[k]['choices']:
-                    if request.GET.get(k + '_' + choice) or request.GET.get(k + '_' + self.any_mapping_keyword):
+                    if request.GET.get(k + '_' + str(choice)) or request.GET.get(k + '_' + self.any_mapping_keyword):
                         filter_dict[k]['default'].append(choice) if choice not in filter_dict[k]['default'] else \
                         filter_dict[k]['default']
         return filter_dict
 
-    def create_filter_submited_dict(self, request, filter_dict):
-        filter_submited_dict = {}
-        for k, v in filter_dict.items():
-            if 'int' in v['type'] or 'float' in v['type']:
-                filter_submited_dict[k] = {}
-                if request.GET.get(k + '_min'):
-                    filter_submited_dict[k]['_min'] = request.GET.get(k + '_min')
-                if request.GET.get(k + '_max'):
-                    filter_submited_dict[k]['_max'] = request.GET.get(k + '_max')
-            if 'list' in v['type']:
-                filter_submited_dict[k] = []
-                for choice in v['choices']:
-                    if request.GET.get(k + '_' + choice):
-                        filter_submited_dict[k].append(choice)
-        return filter_submited_dict
-
-    def filter_products(self, filter_dict, product_list, filter_submited_dict):
+    def filter_products(self, request, filter_dict, product_list):
         product_list_filtered = []
         for product in product_list:
             pass_filtering = True
-            for k, v in filter_submited_dict.items():
-                if 'int' in filter_dict[k]['type'] or 'float' in filter_dict[k]['type']:
-                    if '_min' in v.keys():
-                        if product.attributes_json[k] < float(v['_min']):
+            for k, v in filter_dict.items():
+                if 'int' in v['type'] or 'float' in v['type']:
+                    if request.GET.get(k + '_min'):
+                        if product.attributes_json[k] < float(request.GET.get(k + '_min')):
                             pass_filtering = False
-                    if '_max' in v.keys():
-                        if product.attributes_json[k] > float(v['_max']):
+                            break
+                    if request.GET.get(k + '_max'):
+                        if product.attributes_json[k] > float(request.GET.get(k + '_max')):
                             pass_filtering = False
+                            break
                 if 'list' in filter_dict[k]['type']:
-                    if not any(attr in v for attr in product.attributes_json[k]):
+                    choices = [choice for choice in v['choices'] if request.GET.get(k + '_' + str(choice))]
+                    if not any(attr in choices for attr in product.attributes_json[k]) and not request.GET.get(k + '_' + self.any_mapping_keyword):
                         pass_filtering = False
+                        break
             if pass_filtering:
                 product_list_filtered.append(product)
-
         return product_list_filtered
 
 @receiver(pre_save, sender=ProductCategory)
@@ -137,6 +128,11 @@ def update_category_post(sender, instance, **kwargs):
             for category in ProductCategory.objects.filter(root_category=instance):
                 category.update_category_attrbutes()
 
+@receiver(post_delete, sender=ProductCategory)
+def update_category_post_delete(sender, instance, **kwargs):
+    print(instance.is_root, ProductCategory.objects.filter(root_category=instance.root_category))
+    if not instance.is_root and not ProductCategory.objects.filter(root_category=instance.root_category):
+        instance.root_category.un_root()
 
 class Product(models.Model):
     product_name = models.CharField(max_length=50)
