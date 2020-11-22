@@ -30,8 +30,7 @@ Funkcjonalności główne:
 
 
 KOSZYK:
-1. Koszyk zapisany w bazie danych przyporzadkowany do uzytkownika jest tworzony automatycznie po dodaniu czegokolwiek do koszyka przy zalogowanym uzytkowniku
-TODO 1. Koszyk tworzony automatycznie przy tworzeniu usera jednorazowo 
+1. Koszyk tworzony automatycznie przy tworzeniu usera jednorazowo
 2. Koszyk tymczasowy, przypisany do sesji jest tworzony automatycznie przy dodaniu jakiegokolwiek produktu
 3. Zawartosc koszyka tymczasowego zostaje zapisana po logowaniu do koszyka uzytkowanika
 

@@ -25,12 +25,3 @@ def update_cart_pre(sender, instance, **kwargs):
     if str(instance.user.username) not in instance.cart_name:
        instance.cart_name = str(instance.user.username) + '_' + instance.cart_name
 
-
-def create_user_cart(user): # TODO zamienic na create_or_get_user_cart
-    cart = Cart.objects.filter(user=user)
-    if not cart:
-        cart = Cart(user=user)
-    else:
-        cart = cart[0]
-    # cart.save()
-    return cart

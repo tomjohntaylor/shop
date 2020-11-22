@@ -4,8 +4,6 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 
-from SaleProcess.models import create_user_cart
-
 
 def signupuser(request):
     if request.method == 'GET':
@@ -41,7 +39,7 @@ def loginuser(request):
         else:
             login(request, user)
             if session_cart:
-                cart = create_user_cart(user)
+                cart = Cart.objects.get(user=user)
                 for k, v in session_cart.items():
                     cart.add_product(k, v)
                 cart.save()
