@@ -20,7 +20,7 @@ Funkcjonalności główne:
 
 Filtrowanie:
 1. Filtrowanie jest zależne od typu atrybutu. Dla liczby można określić MIN/MAX. Dla listy wielokrotnego wyboru wskazujemy wybrane parametry. Jezeli produkt ma przynajmniej jedną ze wskazanych przez nas wartosci zostanie wyświetlony po filtrowaniu.
-+ TODO: UNIT_TESTS
++ TODO: UNIT_TESTS (pojedyczne filtrowania kazdego parametru + łączone)
 
 
 PRODUKTY
@@ -53,4 +53,6 @@ KOSZYK:
 + TODO: UNIT_TESTS
 
 
-
+REFACTORING:
+1. Dodac @mark przy testach zeby dalo sie je latwo wyszukiwac/uruchamiac
+2. Uzyc walidatorow zamiast metod wywolywanych przed zapisaniem modelu (https://docs.djangoproject.com/en/3.1/ref/validators/)
