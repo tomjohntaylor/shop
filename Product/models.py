@@ -49,10 +49,18 @@ class ProductCategory(models.Model):
         self.attributes_json = new_attr
         self.save()
 
+    def validate_root_category(self):
+        if self.root_category and self.root_category == self:
+            raise ValidationError('You cant make root category itself!')
+
     def validate_attributes_types(self):
         for k, v in self.attributes_json.items():
             if type(v) not in (int, float, list): # mozna dorzucic bool ewentualnie
                 raise ValidationError('Dopuszczalne typy parametrów to (int, float, list)')
+
+    def inherit_attributes(self):
+        if self.attributes_json == {"dane": 0} and self.root_category:
+            self.attributes_json = self.root_category.attributes_json
 
     def create_filter_dict(self, request, product_list): # tu mozna rozwazyc zeby filter_dict byl atrybutem klasy aktualizowanym zawsze po jej utworzeniu/zmianie
         filter_dict = {}
@@ -102,14 +110,12 @@ class ProductCategory(models.Model):
 
 @receiver(pre_save, sender=ProductCategory)
 def update_category_pre(sender, instance, **kwargs):
-    if instance.root_category and instance.root_category == instance:
-        raise ValidationError('You cant make root category itself!')
+    instance.validate_root_category()
     instance.validate_attributes_types()
     instance.update_category_path()
     if not instance.attributes_old_json:
         instance.attributes_old_json = instance.attributes_json
-    if instance.attributes_json == {"dane": 0} and instance.root_category:
-        instance.attributes_json = instance.root_category.attributes_json
+    instance.inherit_attributes()
     if instance.root_category:
         instance.root_category.make_root()
         for product in Product.objects.all():

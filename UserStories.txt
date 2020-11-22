@@ -2,36 +2,55 @@ KATEGORIE
 
 Funkcjonalności główne:
 1. Administrator dodaje kategorie produktow
-2. Administrator dodaje domyslne atrybuty kategorii dwóch typów: liczba lub lista wyboru (walidacja atrybutow podczas tworzenia)
-3. Administrator tworzy podkategorie wskazując kategorie źródłową (walidacja aby nie mozna bylo utworzyc podkategorii wskazujac siebie na zrodlowa)
+2. Administrator dodaje domyslne atrybuty kategorii dwóch typów: liczba lub lista wyboru (walidacja atrybutow podczas tworzenia) + UNIT_TESTS
+3. Administrator tworzy podkategorie wskazując kategorie źródłową (walidacja aby nie mozna bylo utworzyc podkategorii wskazujac siebie na zrodlowa) + UNIT_TESTS
 4. Jezeli podkategoria nie bedzie miala wskazanych atrybutów ({"dane": 0}) automatycznie zostaną pobrane atrybuty kategorii źrółdowej
++ TODO: UNIT_TESTS
 5. Jezeli administrator zmieni atrybuty kategorii źródłowej atrybuty podkategorii automatycznie zostaną zaktualizowane (dot. dodawania/usuwania atrybutow, zmiamy typu atrybutu lub zmiany wartosci domyslnej)
++ TODO: UNIT_TESTS
 6. Usuniecie kategorii zrodlowej spowoduje usuniecie wszystkich jej podkategorii
++ TODO: UNIT_TESTS
 7. Kazda kategoria posiada atrybut okreslajacy jej sciezke dziedziczenia (category_path), ktora wskazuje jakie sa jej kategorie zrodlowe
++ TODO: UNIT_TESTS
 8. Atrybut typu lista definiuje mozliwe wartosci parametru dla produktu, możliwość wielokrotnego wyboru
++ TODO: UNIT_TESTS
 9. Atrybut typu liczba umożliwia wpisanie wartosci calkowitej jak i zmienno przeczinkowej, ujemnej i dodatniej
++ TODO: UNIT_TESTS
 
 
 Filtrowanie:
 1. Filtrowanie jest zależne od typu atrybutu. Dla liczby można określić MIN/MAX. Dla listy wielokrotnego wyboru wskazujemy wybrane parametry. Jezeli produkt ma przynajmniej jedną ze wskazanych przez nas wartosci zostanie wyświetlony po filtrowaniu.
++ TODO: UNIT_TESTS
 
 
 PRODUKTY
 
 Funkcjonalności główne:
 1. Administrator może utworzyc produkt przyporządkowując go do kategorii nieźródłowych
++ TODO: UNIT_TESTS
 2. Jezeli przy aktualizacji/tworzeniu produktu zostawi się pole atrybutów domyslne ({"dane": 0}) atrybuty zostana pobrane z kategorii produktu wraz z domyslnymi wartosciami
++ TODO: UNIT_TESTS
 3. Zablokowana jest mozliwosc dodawania nazw atrybutow ktore nie są zdefiniowane w kategorii produktu
++ TODO: UNIT_TESTS
 4. Zablokowana jest mozliwosc usuwania nazw atrybutow ktore są zdefiniowane w kategorii produktu
++ TODO: UNIT_TESTS
 5. Zablokowana jest mozliwosc przyporzadkowywania innego typu wartosci atrybutu niz zdefiniowany w atrybutach kategorii produktu
++ TODO: UNIT_TESTS
 6. W przypadku dodania/usuniecia atrybutu z kategorii produktu w produktach tez zostana one dodane/usuniete (dodane z domyslna wartoscia)
++ TODO: UNIT_TESTS
 7. W przypadku zmiany typu atrybutu w kategorii produktu, typ atrybutu w produkcie tez zostanie zaktualizowany wstawiajac wartosc domyslna
++ TODO: UNIT_TESTS
 8. W przypadku gdy kategoria produkta staje sie kategoria źrodłową innych podkategorii produkt do niej przypisany trafia automatycznie do specjalnej kategorii "_Nieprzypisane"
++ TODO: UNIT_TESTS
 
 
 KOSZYK:
 1. Koszyk tworzony automatycznie przy tworzeniu usera jednorazowo
++ TODO: UNIT_TESTS
 2. Koszyk tymczasowy, przypisany do sesji jest tworzony automatycznie przy dodaniu jakiegokolwiek produktu
++ TODO: UNIT_TESTS
 3. Zawartosc koszyka tymczasowego zostaje zapisana po logowaniu do koszyka uzytkowanika
++ TODO: UNIT_TESTS
+
 
 

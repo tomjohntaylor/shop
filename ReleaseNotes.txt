@@ -11,3 +11,4 @@ do uzupełnienia
 
 2020-11-22
 1. Koszyk tworzony automatycznie przy tworzeniu usera jednorazowo
+2. UNIT_TESTS ProductCategory: validate_attributes_types, validate_root_category
