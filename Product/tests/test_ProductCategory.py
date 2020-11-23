@@ -2,7 +2,7 @@ import pytest
 from pytest_mock import mocker
 from django.forms import ValidationError
 
-from Product.models import ProductCategory, update_category_pre
+from Product.models import ProductCategory, pre_save_product_category
 
 
 @pytest.fixture(scope='module')
@@ -12,7 +12,7 @@ def product_category_instance():
     del product_category
 
 
-# testy validate_attributes_types
+# test validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_string_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': 'string'}
@@ -48,7 +48,7 @@ def test_if_validate_attributes_types_raises_exception_correctly_when_none_attri
         product_category_instance.attributes_json = {'atr1': None}
         product_category_instance.validate_attributes_types()
 
-# testy validate_root_category
+# test validate_root_category
 def test_if_validate_root_category_raises_exception_correctly(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.root_category = product_category_instance
@@ -64,7 +64,16 @@ def product_category_instances():
     del product_category1
     del product_category2
 
-# testy inherit_attributes
+
+# test pre_save_product_category signal called methods order
+def test_pre_save_product_category_signal_called_methods_order(mocker, product_category_instances):
+    product_category_mock = mocker.Mock()
+    calls = [mocker.call.validate_root_category(), mocker.call.validate_attributes_types(),
+             mocker.call.update_category_fields(), mocker.call.inherit_attributes()]
+    pre_save_product_category(mocker.Mock, product_category_mock)
+    product_category_mock.assert_has_calls(calls)
+
+# test inherit_attributes
 def test_inherit_attributes_method_works_correctly(product_category_instances): # TUTAJ TRZEBA UZYC MOCKOWANIA JAKIEGOS
     product_category_instances[0].attributes_json = {"test": 1}
     product_category_instances[1].root_category = product_category_instances[0]
@@ -72,10 +81,7 @@ def test_inherit_attributes_method_works_correctly(product_category_instances): 
     product_category_instances[1].inherit_attributes()
     assert product_category_instances[1].attributes_json == product_category_instances[0].attributes_json
 
-def test_if_inherit_attributes_method_is_called(mocker, product_category_instances):
-    mocker.patch('Product.models.ProductCategory.inherit_attributes')
-    update_category_pre(ProductCategory, product_category_instances[0])
-    ProductCategory.inherit_attributes.assert_called()
+
 
 
 

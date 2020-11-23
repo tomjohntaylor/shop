@@ -30,11 +30,19 @@ class ProductCategory(models.Model):
         self.is_root = False
         self.save()
 
-    def update_category_path(self):
+    def merge_attributes_ols_json(self):
+        self.attributes_old_json = self.attributes_json
+        self.save()
+
+    def update_category_fields(self):
         if self.root_category:
             self.category_path = self.root_category.category_path + '-' + self.category_name
         else:
             self.category_path = self.category_name
+        if not self.attributes_old_json:
+            self.attributes_old_json = self.attributes_json
+        if self.root_category:
+            self.root_category.make_root()
 
     def update_category_attrbutes(self):
         new_attr = {}
@@ -109,36 +117,31 @@ class ProductCategory(models.Model):
         return product_list_filtered
 
 @receiver(pre_save, sender=ProductCategory)
-def update_category_pre(sender, instance, **kwargs):
+def pre_save_product_category(sender, instance, **kwargs):
     instance.validate_root_category()
     instance.validate_attributes_types()
-    instance.update_category_path()
-    if not instance.attributes_old_json:
-        instance.attributes_old_json = instance.attributes_json
+    instance.update_category_fields()
     instance.inherit_attributes()
+
+@receiver(post_save, sender=ProductCategory)
+def post_save_product_category(sender, instance, **kwargs):
     if instance.root_category:
-        instance.root_category.make_root()
         for product in Product.objects.all():
             if product.product_category == instance.root_category:
                 product.move_to_not_assigned()
-
-@receiver(post_save, sender=ProductCategory)
-def update_category_post(sender, instance, **kwargs):
     if instance.attributes_json != instance.attributes_old_json:
         for product in Product.objects.filter(product_category=instance):
             product.update_product_attrbutes()
-        instance.attributes_old_json = instance.attributes_json
-        instance.save()
-
         if instance.is_root:
             for category in ProductCategory.objects.filter(root_category=instance):
                 category.update_category_attrbutes()
+        instance.merge_attributes_ols_json()
 
 @receiver(post_delete, sender=ProductCategory)
-def update_category_post_delete(sender, instance, **kwargs):
-    print(instance.is_root, ProductCategory.objects.filter(root_category=instance.root_category))
+def post_delete_product_category(sender, instance, **kwargs):
     if not instance.is_root and not ProductCategory.objects.filter(root_category=instance.root_category):
         instance.root_category.un_root()
+
 
 class Product(models.Model):
     product_name = models.CharField(max_length=50)

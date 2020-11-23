@@ -13,3 +13,6 @@ do uzupełnienia
 1. Koszyk tworzony automatycznie przy tworzeniu usera jednorazowo
 2. UNIT_TESTS ProductCategory: validate_attributes_types, validate_root_category
 3. UNIT_TESTS ProductCategory: inherit_attributes
+
+2020-11-23
+1. UNIT_TESTS ProductCategory: pre_save_product_category signal called methods order
