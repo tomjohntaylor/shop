@@ -19,3 +19,6 @@ do uzupełnienia
 
 2020-11-24
 1. UNIT_TESTS ProductCategory: update_category_fields (patchowana metoda make_root() - do dokonczenia)
+
+2020-11-25
+1. UNIT_TESTS ProductCategory: update_category_fields - dokonczone testowe make_root() (patchowana tylko metoda save() ktorej testowac nie trzeba)

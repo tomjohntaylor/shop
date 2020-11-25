@@ -80,15 +80,14 @@ def test_update_category_fields_method_when_none_root_category(product_category_
 def test_update_category_fields_method_when_specific_root_category(product_category_instances):
     product_category_instances[0].category_name = 'Test category'
     product_category_instances[1].category_path = 'Root category'
-
     product_category_instances[0].root_category = product_category_instances[1]
-    with patch('Product.models.ProductCategory.make_root'): # TODO: Nie przetestowane metody: make_root i un_root
+    with patch('Product.models.ProductCategory.save'):
        product_category_instances[0].update_category_fields()
-    assert product_category_instances[0].category_path == product_category_instances[1].category_path + '-' + product_category_instances[0].category_name
+    assert product_category_instances[0].category_path == 'Root category' + '-' + 'Test category' and product_category_instances[1].is_root
 
 def test_update_category_fields_method_when_none_attributes_old_json(product_category_instances):
     product_category_instances[0].attributes_json = {"test": 2}
-    with patch('Product.models.ProductCategory.make_root'):
+    with patch('Product.models.ProductCategory.save'):
        product_category_instances[0].update_category_fields()
     assert product_category_instances[0].attributes_old_json == product_category_instances[0].attributes_json
 
@@ -96,7 +95,7 @@ def test_update_category_fields_method_when_specific_attributes_old_json(product
     product_category_instances[0].attributes_json = {"test": 2}
     product_category_instances[0].attributes_old_json = {"test": 1}
     expected_value = product_category_instances[0].attributes_old_json
-    with patch('Product.models.ProductCategory.make_root'):
+    with patch('Product.models.ProductCategory.save'):
        product_category_instances[0].update_category_fields()
     assert product_category_instances[0].attributes_old_json == expected_value
 
