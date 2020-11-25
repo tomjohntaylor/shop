@@ -3,7 +3,7 @@ from pytest_mock import mocker
 from unittest.mock import patch
 from django.forms import ValidationError
 
-from Product.models import ProductCategory, pre_save_product_category
+from Product.models import ProductCategory, pre_save_product_category, post_save_product_category
 
 
 @pytest.fixture(scope='module')
@@ -33,7 +33,6 @@ def test_if_validate_root_category_raises_exception_correctly(product_category_i
     with pytest.raises(ValidationError):
         product_category_instance.root_category = product_category_instance
         product_category_instance.validate_root_category()
-
 
 # test validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_string_attribute(product_category_instance):
@@ -108,14 +107,18 @@ def test_inherit_attributes_method_works_correctly(product_category_instances):
     assert product_category_instances[1].attributes_json == product_category_instances[0].attributes_json
 
 
-
-
-
-
-
-
-
-
+# test post_save_product_category signal called methods order
+def test_post_save_product_category_signal_called_methods_order(mocker):
+    product_category_mock = mocker.Mock()
+    product_category_mock_root = mocker.Mock()
+    product_category_mock.root_category = product_category_mock_root
+    product_category_mock.attributes_json = {'test': 1}
+    product_category_mock.attributes_old_json = {'test': 2}
+    product_category_mock.is_root = True
+    calls = [mocker.call.update_products_after_making_category_root(), mocker.call.update_products_after_category_attr_changes(),
+             mocker.call.update_subcategories_after_category_attr_changes(), mocker.call.merge_attributes_ols_json()]
+    post_save_product_category(mocker.Mock, product_category_mock)
+    product_category_mock.assert_has_calls(calls)
 
 
 

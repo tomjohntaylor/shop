@@ -48,7 +48,7 @@ class ProductCategory(models.Model):
         new_attr = {}
         for k, v in self.root_category.attributes_json.items():
             if k in self.attributes_json.keys():
-                if isinstance(product_attr[k], type(category_attr[k])):
+                if isinstance(self.attributes_json[k], type(self.root_category.attributes_json[k])):
                     new_attr[k] = self.attributes_json[k]
                 else:
                     new_attr[k] = self.root_category.attributes_json[k]
@@ -69,6 +69,18 @@ class ProductCategory(models.Model):
     def inherit_attributes(self):
         if self.attributes_json == {"dane": 0} and self.root_category:
             self.attributes_json = self.root_category.attributes_json
+
+    def update_products_after_making_category_root(self):
+        for product in Product.objects.filter(product_category=self):
+            product.move_to_not_assigned()
+
+    def update_products_after_category_attr_changes(self):
+        for product in Product.objects.filter(product_category=self):
+            product.update_product_attrbutes()
+
+    def update_subcategories_after_category_attr_changes(self):
+        for category in ProductCategory.objects.filter(root_category=self):
+            category.update_category_attrbutes()
 
     def create_filter_dict(self, request, product_list): # tu mozna rozwazyc zeby filter_dict byl atrybutem klasy aktualizowanym zawsze po jej utworzeniu/zmianie
         filter_dict = {}
@@ -126,15 +138,11 @@ def pre_save_product_category(sender, instance, **kwargs):
 @receiver(post_save, sender=ProductCategory)
 def post_save_product_category(sender, instance, **kwargs):
     if instance.root_category:
-        for product in Product.objects.all():
-            if product.product_category == instance.root_category:
-                product.move_to_not_assigned()
+        instance.update_products_after_making_category_root()
     if instance.attributes_json != instance.attributes_old_json:
-        for product in Product.objects.filter(product_category=instance):
-            product.update_product_attrbutes()
+        instance.update_products_after_category_attr_changes()
         if instance.is_root:
-            for category in ProductCategory.objects.filter(root_category=instance):
-                category.update_category_attrbutes()
+            instance.update_subcategories_after_category_attr_changes()
         instance.merge_attributes_ols_json()
 
 @receiver(post_delete, sender=ProductCategory)

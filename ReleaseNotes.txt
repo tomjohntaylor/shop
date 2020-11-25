@@ -22,3 +22,4 @@ do uzupełnienia
 
 2020-11-25
 1. UNIT_TESTS ProductCategory: update_category_fields - dokonczone testowe make_root() (patchowana tylko metoda save() ktorej testowac nie trzeba)
+2. UNIT_TESTS ProductCategory: post_save_product_category signal called methods order
