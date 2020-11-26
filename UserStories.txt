@@ -53,6 +53,9 @@ KOSZYK:
 + TODO: UNIT_TESTS
 
 
+DOKUMENTACJA:
+1. Dopisać brakujące UserStories zgodnie z testami jednostkowymi
+
 REFACTORING:
 1. Dodac @mark przy testach zeby dalo sie je latwo wyszukiwac/uruchamiac
 2. Uzyc walidatorow zamiast metod wywolywanych przed zapisaniem modelu (https://docs.djangoproject.com/en/3.1/ref/validators/)

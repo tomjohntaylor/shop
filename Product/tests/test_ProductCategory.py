@@ -3,7 +3,7 @@ from pytest_mock import mocker
 from unittest.mock import patch
 from django.forms import ValidationError
 
-from Product.models import ProductCategory, pre_save_product_category, post_save_product_category
+from Product.models import Product, ProductCategory, pre_save_product_category, post_save_product_category, post_delete_product_category
 
 
 @pytest.fixture(scope='module')
@@ -12,13 +12,27 @@ def product_category_instance():
     yield product_category
     del product_category
 
-@pytest.fixture(scope = 'function')
+@pytest.fixture(scope='function')
+def product_category_notassigned_instance():
+    product_category = ProductCategory(category_name='_Nieprzypisane', category_path='_Nieprzypisane')
+    yield product_category
+    del product_category
+
+@pytest.fixture(scope='function')
 def product_category_instances():
     product_category1 = ProductCategory()
     product_category2 = ProductCategory()
     yield (product_category1, product_category2)
     del product_category1
     del product_category2
+
+@pytest.fixture(scope='function')
+def product_instances():
+    product1 = Product()
+    product2 = Product()
+    yield (product1, product2)
+    del product1
+    del product2
 
 # test pre_save_product_category signal called methods order
 def test_pre_save_product_category_signal_called_methods_order(mocker):
@@ -120,21 +134,61 @@ def test_post_save_product_category_signal_called_methods_order(mocker):
     post_save_product_category(mocker.Mock, product_category_mock)
     product_category_mock.assert_has_calls(calls)
 
+def test_update_products_after_making_category_root_works_correctly(mocker, product_category_instance,
+                                                                            product_instances, product_category_notassigned_instance):
+    product_instances[0].product_category = product_category_instance
+    product_instances[1].product_category = product_category_instance
+    mocker.patch('Product.models.Product.objects.filter', return_value=[product_instances[0], product_instances[1]])
+    mocker.patch('Product.models.ProductCategory.objects.filter', return_value=True)
+    mocker.patch('Product.models.ProductCategory.objects.get', return_value=product_category_notassigned_instance)
+    mocker.patch('Product.models.Product.save')
+    product_category_instance.update_products_after_making_category_root()
+    assert product_instances[0].product_category == product_category_notassigned_instance \
+           and product_instances[1].product_category == product_category_notassigned_instance
 
+def test_update_products_after_category_attr_changes_works_correctly(mocker, product_category_instance,
+                                                                            product_instances):
+    product_category_instance.attributes_json = {'product_category_instance': 'yes', 'product_instance1': 'no',
+                                                 'product_instance2': 'no', 'additional_number': 2}
+    product_instances[0].product_category = product_category_instance
+    product_instances[1].product_category = product_category_instance
+    product_instances[0].attributes_json = {'product_instance1': 'yes', 'additional_number': 'not_number1'}
+    product_instances[1].attributes_json = {'product_instance2': 'yes', 'additional_number': 'not_number2'}
+    mocker.patch('Product.models.Product.objects.filter', return_value=[product_instances[0], product_instances[1]])
+    mocker.patch('Product.models.Product.save')
+    product_category_instance.update_products_after_category_attr_changes()
+    assert product_instances[0].attributes_json == {'product_category_instance': 'yes', 'product_instance1': 'yes',
+                                                    'product_instance2': 'no', 'additional_number': 2} \
+           and product_instances[1].attributes_json == {'product_category_instance': 'yes', 'product_instance1': 'no',
+                                                        'product_instance2': 'yes', 'additional_number': 2}
 
-#################################################################################################
+def test_update_subcategories_after_category_attr_changes_works_correctly(mocker, product_category_instance,
+                                                                            product_category_instances):
+    product_category_instance.attributes_json = {'root_category_instance': 'yes', 'subcategory_instance1': 'no',
+                                                 'subcategory_instance2': 'no', 'additional_number': 2}
+    product_category_instances[0].root_category = product_category_instance
+    product_category_instances[1].root_category = product_category_instance
+    product_category_instances[0].attributes_json = {'subcategory_instance1': 'yes', 'additional_number': 'not_number1'}
+    product_category_instances[1].attributes_json = {'subcategory_instance2': 'yes', 'additional_number': 'not_number2'}
+    mocker.patch('Product.models.ProductCategory.objects.filter', return_value=[product_category_instances[0], product_category_instances[1]])
+    mocker.patch('Product.models.ProductCategory.save')
+    product_category_instance.update_subcategories_after_category_attr_changes()
+    assert product_category_instances[0].attributes_json == {'root_category_instance': 'yes', 'subcategory_instance1': 'yes',
+                                                    'subcategory_instance2': 'no', 'additional_number': 2} \
+           and product_category_instances[1].attributes_json == {'root_category_instance': 'yes', 'subcategory_instance1': 'no',
+                                                        'subcategory_instance2': 'yes', 'additional_number': 2}
 
-# @pytest.fixture()
-# def product_category_instances():
-#     product_category1 = ProductCategory()
-#     product_category2 = ProductCategory()
-#     yield (product_category1, product_category2)
-#     del product_category1
-#     del product_category2
+def test_merge_attributes_ols_json_works_correctly(mocker, product_category_instance):
+    product_category_instance.attributes_json = {'data': '1'}
+    product_category_instance.attributes_old_json = {'data': '2'}
+    mocker.patch('Product.models.ProductCategory.save')
+    product_category_instance.merge_attributes_ols_json()
+    assert product_category_instance.attributes_old_json == product_category_instance.attributes_json
 
-# testy validate_attributes_types
-# def test_inherit_attributes(product_category_instances):
-#     product_category_instances[0].attributes_json = {"test": 1}
-#     product_category_instances[1].root_category = product_category_instances[1]
-#     product_category_instances[1].attributes_json = {"dane": 0}
-#     assert product_category_instances[1].attributes_json == product_category_instances[0].attributes_json
+def test_post_delete_product_category_signal_called_methods_order(mocker):
+    product_category_mock = mocker.Mock()
+    product_category_mock.is_root = False
+    mocker.patch('Product.models.ProductCategory.objects.filter', return_value=None)
+    calls = [mocker.call.root_category.un_root()]
+    post_delete_product_category(mocker.Mock, product_category_mock)
+    product_category_mock.assert_has_calls(calls)
