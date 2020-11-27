@@ -2,16 +2,12 @@ KATEGORIE
 
 Funkcjonalności główne:
 1. Administrator dodaje kategorie produktow
-2. Administrator dodaje domyslne atrybuty kategorii dwóch typów: liczba lub lista wyboru (walidacja atrybutow podczas tworzenia) + UNIT_TESTS
-3. Administrator tworzy podkategorie wskazując kategorie źródłową (walidacja aby nie mozna bylo utworzyc podkategorii wskazujac siebie na zrodlowa) + UNIT_TESTS
-4. Jezeli podkategoria nie bedzie miala wskazanych atrybutów ({"dane": 0}) automatycznie zostaną pobrane atrybuty kategorii źrółdowej
-+ TODO: UNIT_TESTS
-5. Jezeli administrator zmieni atrybuty kategorii źródłowej atrybuty podkategorii automatycznie zostaną zaktualizowane (dot. dodawania/usuwania atrybutow, zmiamy typu atrybutu lub zmiany wartosci domyslnej)
-+ TODO: UNIT_TESTS
-6. Usuniecie kategorii zrodlowej spowoduje usuniecie wszystkich jej podkategorii
-+ TODO: UNIT_TESTS
-7. Kazda kategoria posiada atrybut okreslajacy jej sciezke dziedziczenia (category_path), ktora wskazuje jakie sa jej kategorie zrodlowe
-+ TODO: UNIT_TESTS
+2. Administrator dodaje domyslne atrybuty kategorii dwóch typów: liczba lub lista wyboru (walidacja atrybutow podczas tworzenia) + UNIT_TESTS (walidacja atrybutów @pytest.mark.validate_attributes_types)
+3. Administrator tworzy podkategorie wskazując kategorie źródłową (walidacja aby nie mozna bylo utworzyc podkategorii wskazujac siebie na zrodlowa) + UNIT_TESTS (walidacja kategorii źrodłowej @pytest.mark.validate_root_category)
+4. Jezeli podkategoria nie bedzie miala wskazanych atrybutów ({"dane": 0}) automatycznie zostaną pobrane atrybuty kategorii źrółdowej + UNIT_TESTS @pytest.mark.inherit_attributes
+5. Jezeli administrator zmieni atrybuty kategorii źródłowej atrybuty podkategorii automatycznie zostaną zaktualizowane (dot. dodawania/usuwania atrybutow, zmiamy typu atrybutu lub zmiany wartosci domyslnej) + UNIT_TESTS: @pytest.mark.update_subcategories_after_category_attr_changes
+6. Usuniecie kategorii zrodlowej spowoduje usuniecie wszystkich jej podkategorii + TODO: UNIT_TESTS
+7. Kazda kategoria posiada atrybut okreslajacy jej sciezke dziedziczenia (category_path), ktora wskazuje jakie sa jej kategorie zrodlowe + UNIT_TESTS @pytest.mark.update_category_fields
 8. Atrybut typu lista definiuje mozliwe wartosci parametru dla produktu, możliwość wielokrotnego wyboru
 + TODO: UNIT_TESTS
 9. Atrybut typu liczba umożliwia wpisanie wartosci calkowitej jak i zmienno przeczinkowej, ujemnej i dodatniej

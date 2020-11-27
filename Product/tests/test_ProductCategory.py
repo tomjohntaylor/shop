@@ -34,7 +34,11 @@ def product_instances():
     del product1
     del product2
 
-# test pre_save_product_category signal called methods order
+@pytest.mark.pre_save_product_category_signal
+@pytest.mark.validate_root_category
+@pytest.mark.validate_attributes_types
+@pytest.mark.update_category_fields
+@pytest.mark.inherit_attributes
 def test_pre_save_product_category_signal_called_methods_order(mocker):
     product_category_mock = mocker.Mock()
     calls = [mocker.call.validate_root_category(), mocker.call.validate_attributes_types(),
@@ -42,54 +46,61 @@ def test_pre_save_product_category_signal_called_methods_order(mocker):
     pre_save_product_category(mocker.Mock, product_category_mock)
     product_category_mock.assert_has_calls(calls)
 
-# test validate_root_category
+@pytest.mark.validate_root_category
 def test_if_validate_root_category_raises_exception_correctly(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.root_category = product_category_instance
         product_category_instance.validate_root_category()
 
-# test validate_attributes_types
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_string_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': 'string'}
         product_category_instance.validate_attributes_types()
 
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_dict_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': {'key': 'value'}}
         product_category_instance.validate_attributes_types()
 
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_bool_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': True}
         product_category_instance.validate_attributes_types()
 
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_tuple_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': (1, 2)}
         product_category_instance.validate_attributes_types()
 
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_set_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': {1, 2}}
         product_category_instance.validate_attributes_types()
 
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_complex_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': 3+2.7j}
         product_category_instance.validate_attributes_types()
 
+@pytest.mark.validate_attributes_types
 def test_if_validate_attributes_types_raises_exception_correctly_when_none_attribute(product_category_instance):
     with pytest.raises(ValidationError):
         product_category_instance.attributes_json = {'atr1': None}
         product_category_instance.validate_attributes_types()
 
-# test update_category_fields
+@pytest.mark.update_category_fields
 def test_update_category_fields_method_when_none_root_category(product_category_instances):
     product_category_instances[0].category_name = 'Test category'
     product_category_instances[0].update_category_fields()
     assert product_category_instances[0].category_path == product_category_instances[0].category_name
 
+@pytest.mark.update_category_fields
 def test_update_category_fields_method_when_specific_root_category(product_category_instances):
     product_category_instances[0].category_name = 'Test category'
     product_category_instances[1].category_path = 'Root category'
@@ -98,12 +109,14 @@ def test_update_category_fields_method_when_specific_root_category(product_categ
        product_category_instances[0].update_category_fields()
     assert product_category_instances[0].category_path == 'Root category' + '-' + 'Test category' and product_category_instances[1].is_root
 
+@pytest.mark.update_category_fields
 def test_update_category_fields_method_when_none_attributes_old_json(product_category_instances):
     product_category_instances[0].attributes_json = {"test": 2}
     with patch('Product.models.ProductCategory.save'):
        product_category_instances[0].update_category_fields()
     assert product_category_instances[0].attributes_old_json == product_category_instances[0].attributes_json
 
+@pytest.mark.update_category_fields
 def test_update_category_fields_method_when_specific_attributes_old_json(product_category_instances):
     product_category_instances[0].attributes_json = {"test": 2}
     product_category_instances[0].attributes_old_json = {"test": 1}
@@ -112,7 +125,7 @@ def test_update_category_fields_method_when_specific_attributes_old_json(product
        product_category_instances[0].update_category_fields()
     assert product_category_instances[0].attributes_old_json == expected_value
 
-# test inherit_attributes
+@pytest.mark.inherit_attributes
 def test_inherit_attributes_method_works_correctly(product_category_instances):
     product_category_instances[0].attributes_json = {"test": 1}
     product_category_instances[1].root_category = product_category_instances[0]
@@ -121,7 +134,11 @@ def test_inherit_attributes_method_works_correctly(product_category_instances):
     assert product_category_instances[1].attributes_json == product_category_instances[0].attributes_json
 
 
-# test post_save_product_category signal called methods order
+@pytest.mark.post_save_product_category_signal
+@pytest.mark.update_products_after_making_category_root
+@pytest.mark.update_products_after_category_attr_changes
+@pytest.mark.update_subcategories_after_category_attr_changes
+@pytest.mark.merge_attributes_ols_json
 def test_post_save_product_category_signal_called_methods_order(mocker):
     product_category_mock = mocker.Mock()
     product_category_mock_root = mocker.Mock()
@@ -134,6 +151,7 @@ def test_post_save_product_category_signal_called_methods_order(mocker):
     post_save_product_category(mocker.Mock, product_category_mock)
     product_category_mock.assert_has_calls(calls)
 
+@pytest.mark.update_products_after_making_category_root
 def test_update_products_after_making_category_root_works_correctly(mocker, product_category_instance,
                                                                             product_instances, product_category_notassigned_instance):
     product_instances[0].product_category = product_category_instance
@@ -146,6 +164,7 @@ def test_update_products_after_making_category_root_works_correctly(mocker, prod
     assert product_instances[0].product_category == product_category_notassigned_instance \
            and product_instances[1].product_category == product_category_notassigned_instance
 
+@pytest.mark.update_products_after_category_attr_changes
 def test_update_products_after_category_attr_changes_works_correctly(mocker, product_category_instance,
                                                                             product_instances):
     product_category_instance.attributes_json = {'product_category_instance': 'yes', 'product_instance1': 'no',
@@ -162,6 +181,7 @@ def test_update_products_after_category_attr_changes_works_correctly(mocker, pro
            and product_instances[1].attributes_json == {'product_category_instance': 'yes', 'product_instance1': 'no',
                                                         'product_instance2': 'yes', 'additional_number': 2}
 
+@pytest.mark.update_subcategories_after_category_attr_changes
 def test_update_subcategories_after_category_attr_changes_works_correctly(mocker, product_category_instance,
                                                                             product_category_instances):
     product_category_instance.attributes_json = {'root_category_instance': 'yes', 'subcategory_instance1': 'no',
@@ -178,6 +198,7 @@ def test_update_subcategories_after_category_attr_changes_works_correctly(mocker
            and product_category_instances[1].attributes_json == {'root_category_instance': 'yes', 'subcategory_instance1': 'no',
                                                         'subcategory_instance2': 'yes', 'additional_number': 2}
 
+@pytest.mark.merge_attributes_ols_json
 def test_merge_attributes_ols_json_works_correctly(mocker, product_category_instance):
     product_category_instance.attributes_json = {'data': '1'}
     product_category_instance.attributes_old_json = {'data': '2'}
@@ -185,6 +206,8 @@ def test_merge_attributes_ols_json_works_correctly(mocker, product_category_inst
     product_category_instance.merge_attributes_ols_json()
     assert product_category_instance.attributes_old_json == product_category_instance.attributes_json
 
+@pytest.mark.post_delete_product_category_signal
+@pytest.mark.un_root
 def test_post_delete_product_category_signal_called_methods_order(mocker):
     product_category_mock = mocker.Mock()
     product_category_mock.is_root = False
@@ -192,3 +215,11 @@ def test_post_delete_product_category_signal_called_methods_order(mocker):
     calls = [mocker.call.root_category.un_root()]
     post_delete_product_category(mocker.Mock, product_category_mock)
     product_category_mock.assert_has_calls(calls)
+
+@pytest.mark.un_root
+def test_un_root_method_works_correctly(mocker, product_category_instances):
+    product_category_instances[0].root_category = product_category_instances[1]
+    product_category_instances[1].is_root = True
+    mocker.patch('Product.models.ProductCategory.save')
+    product_category_instances[0].root_category.un_root()
+    assert not product_category_instances[1].is_root

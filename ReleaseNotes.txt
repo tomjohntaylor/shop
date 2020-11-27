@@ -7,10 +7,10 @@ do uzupełnienia
 2020-11-21
 1. Dodanie UserStories.txt
 2. Usuwanie produktu z koszyka gdy zostanie usuniety z bazy danych
-3. Dziedziczenie zmian z kategorii zrodlowej do podkategorii
+3. Dziedziczenie zmian atrybutów z kategorii zrodlowej do podkategorii
 
 2020-11-22
-1. Koszyk tworzony automatycznie przy tworzeniu usera jednorazowo
+1. Koszyk tworzony automatycznie przy tworzeniu usera (jednorazowo)
 2. UNIT_TESTS ProductCategory: validate_attributes_types, validate_root_category
 3. UNIT_TESTS ProductCategory: inherit_attributes
 
@@ -30,3 +30,8 @@ do uzupełnienia
 3. UNIT_TESTS ProductCategory: test_update_subcategories_after_category_attr_changes_works_correctly
 4. UNIT_TESTS ProductCategory: test_merge_attributes_ols_json_works_correctly
 5. UNIT_TESTS ProductCategory: test_post_delete_product_category_signal_called_methods_order
+
+2020-11-27
+1. UNIT_TESTS ProductCategory: test_un_root_method_works_correctly
+2. UNIT_TESTS: pytest.mark... added
+3. UserStories UNIT_TESTS update
